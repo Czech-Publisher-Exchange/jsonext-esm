@@ -1,6 +1,6 @@
-const assert = require('assert')
-const sinon = require('sinon')
-const JSONext = require('../lib/')
+import assert from 'assert'
+import sinon from 'sinon'
+import JSONext from '../src/index.js'
 
 describe('JSONext', function () {
 	describe('#parse()', function () {
@@ -83,8 +83,11 @@ describe('JSONext', function () {
 
 			it('should parse signed numbers', function () {
 				let warn = sinon.stub(console, 'warn')
-				assert.deepStrictEqual([-1, +2, -0.1, -0, -Infinity], JSONext.parse('[-1,+2,-.1,-0,-Infinity]'))
-				warn.restore()
+				try {
+					assert.deepStrictEqual([-1, +2, -0.1, 0, -Infinity], JSONext.parse('[-1,+2,-.1,-0,-Infinity]'))
+				} finally {
+					warn.restore()
+				}
 			})
 
 			it('should parse leading decimal points', function () {
@@ -115,18 +118,24 @@ describe('JSONext', function () {
 				const warn = sinon.stub(console, 'warn', function (message) {
 					assert(message.indexOf('Infinity') >= 0)
 				})
-				assert.strictEqual(Infinity, JSONext.parse('Infinity'))
-				assert(warn.calledOnce)
-				warn.restore()
+				try {
+					assert.strictEqual(Infinity, JSONext.parse('Infinity'))
+					assert(warn.calledOnce)
+				} finally {
+					warn.restore()
+				}
 			})
 
 			it('should parse NaN with a warning', function () {
 				const warn = sinon.stub(console, 'warn', function (message) {
 					assert(message.indexOf('NaN') >= 0)
 				})
-				assert(isNaN(JSONext.parse('NaN')))
-				assert(warn.calledOnce)
-				warn.restore()
+				try {
+					assert(isNaN(JSONext.parse('NaN')))
+					assert(warn.calledOnce)
+				} finally {
+					warn.restore()
+				}
 			})
 		})
 
@@ -151,9 +160,12 @@ describe('JSONext', function () {
 				const warn = sinon.stub(console, 'warn', function (message) {
 					assert(message.indexOf('not valid ECMAScript') >= 0)
 				})
-				assert.strictEqual('\u2028\u2029', JSONext.parse("'\u2028\u2029'"))
-				assert(warn.calledTwice)
-				warn.restore()
+				try {
+					assert.strictEqual('\u2028\u2029', JSONext.parse("'\u2028\u2029'"))
+					assert(warn.calledTwice)
+				} finally {
+					warn.restore()
+				}
 			})
 		})
 
